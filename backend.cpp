@@ -87,7 +87,7 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
         cout << "content.opf not found" << endl;
     }
 
-    valuesChanged();
+    emit valuesChanged();
 
     return;
 }

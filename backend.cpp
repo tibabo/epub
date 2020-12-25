@@ -1,6 +1,5 @@
-#include "backend.h"
+﻿#include "backend.h"
 #include "minizip/unzip.h"
-#include <QXmlStreamReader>
 #include <QDomDocument>
 
 using namespace std;
@@ -21,9 +20,9 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
 
     if(unZipOneFile((char*)"content.opf", &buf, &length, (char *)str.c_str()))
     {
-        QXmlStreamReader xmlReader((const char*)buf);
+        QByteArray array((const char *)buf,(int)length);
         QDomDocument doc;
-        doc.setContent(&xmlReader,false);
+        doc.setContent(array,false);
         QDomElement root=doc.documentElement();
 
         // Get root names and attributes

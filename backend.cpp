@@ -25,11 +25,6 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
         doc.setContent(array,false);
         QDomElement root=doc.documentElement();
 
-        // Get root names and attributes
-        QString Type=root.tagName();
-        QString version=root.attribute("version","0.0");
-        QString uuid=root.attribute("unique-identifier","");
-
         // Get the first child of the root (Markup metadata is expected)
         QDomElement Component=root.firstChild().toElement();
 

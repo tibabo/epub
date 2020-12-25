@@ -5,13 +5,11 @@ import QtQuick.Dialogs 1.0
 import Qt.Reader 1.0
 
 
-
-
 Window {
     width: 640
     height: 480
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("Epub Metadata reader")
 
     FileDialog {
         id: fileDialog
@@ -28,16 +26,20 @@ Window {
         nameFilters: [ "Epub (*.epub)" ]
     }
 
-
-
-    property int someValue: MyApi.someProperty
-
-    Component.onCompleted: {
-        console.log(MyApi.doSomething())
-    }
-
     Button {
+            width: 100
+            height: 50
             text: "Open"
             onClicked: fileDialog.open()
         }
+    Text
+    {
+        x:100
+        text: "TITLE: " + MyApi.title +
+              "\n\rCREATOR: " + MyApi.creator +
+              "\n\rLANGUAGE: " + MyApi.language +
+              "\n\rPUBLISHER: " + MyApi.publisher +
+              "\n\rPUBLISH DATE: " + MyApi.publishDate
+
+    }
 }

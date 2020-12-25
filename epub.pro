@@ -1,7 +1,6 @@
-QT += quick
+QT += quick xml
 
-CONFIG += c++11
-CONFIG += sdk_no_version_check
+CONFIG += c++11 sdk_no_version_check
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.

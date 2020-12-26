@@ -13,17 +13,12 @@ using namespace std;
 #define STRING_PROPERTY(a) public : \
     QString a() const { return m_##a;} \
     private: \
+    Q_PROPERTY(QString a       READ a        NOTIFY valuesChanged) \
         QString m_##a;
 
 class SingletonEpubReader : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString creator     READ creator      NOTIFY valuesChanged)
-    Q_PROPERTY(QString publishDate READ publishDate  NOTIFY valuesChanged)
-    Q_PROPERTY(QString publisher   READ publisher    NOTIFY valuesChanged)
-    Q_PROPERTY(QString language    READ language     NOTIFY valuesChanged)
-    Q_PROPERTY(QString title       READ title        NOTIFY valuesChanged)
-
 
     STRING_PROPERTY(creator)
     STRING_PROPERTY(publishDate)

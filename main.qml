@@ -18,7 +18,7 @@ Window {
 
         onAccepted: {
             console.log("You chose: " + fileDialog.fileUrl)
-            MyApi.openFile(fileDialog.fileUrl);
+            Epub.openFile(fileDialog.fileUrl);
         }
         onRejected: {
             console.log("Canceled")
@@ -35,11 +35,11 @@ Window {
     Text
     {
         x:100
-        text: "TITLE: " + MyApi.title +
-              "\n\rCREATOR: " + MyApi.creator +
-              "\n\rLANGUAGE: " + MyApi.language +
-              "\n\rPUBLISHER: " + MyApi.publisher +
-              "\n\rPUBLISH DATE: " + MyApi.publishDate
+        text: "TITLE: " + Epub.title +
+              "\n\rCREATOR: " + Epub.creator +
+              "\n\rLANGUAGE: " + Epub.language +
+              "\n\rPUBLISHER: " + Epub.publisher +
+              "\n\rPUBLISH DATE: " + Epub.publishDate
 
     }
 }

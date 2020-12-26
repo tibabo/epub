@@ -117,7 +117,6 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
                 // Read each child of the metadata node
                 while (!child.isNull())
                 {
-                    // Read Name and value
                     checkTag(child,"dc:creator", m_creator);
                     checkTag(child,"dc:title", m_title);
                     checkTag(child,"dc:language", m_language);

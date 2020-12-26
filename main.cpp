@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     // Third, register the singleton type provider with QML by calling this
     // function in an initialization function.
-    qmlRegisterSingletonInstance("Qt.Reader", 1, 0, "MyApi", reader.get());
+    qmlRegisterSingletonInstance("Qt.Reader", 1, 0, "Epub", reader.get());
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

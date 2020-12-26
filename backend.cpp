@@ -1,6 +1,5 @@
 ﻿#include "backend.h"
 #include "minizip/unzip.h"
-#include <QDomDocument>
 
 using namespace std;
 
@@ -10,7 +9,7 @@ const char *pathExtension(const char *filename) {
     return dot + 1;
 }
 
-bool findOpfFile(const char * path, unsigned  char ** buffer , unsigned long long *length)
+bool SingletonEpubReader::findOpfFileInZip(const char * path, unsigned  char ** buffer , unsigned long long *length)
 {
     int ret;
     zipFile zip = unzOpen(path);
@@ -61,13 +60,22 @@ bool findOpfFile(const char * path, unsigned  char ** buffer , unsigned long lon
     return true;
 }
 
+void SingletonEpubReader::checkTag(const QDomElement & child, const QString & tag, QString & dest)
+{
+    if (child.tagName() == tag)
+    {
+        dest = child.firstChild().toText().data();
+        qDebug() << tag << " : " << dest;
+    }
+}
+
 void SingletonEpubReader::openFile(const QUrl & filurl)
 {
-    setcreator("");
-    setpublishDate("");
-    setpublisher("");
-    settitle("");
-    setlanguage("");
+    m_creator = "";
+    m_publishDate ="";
+    m_publisher ="";
+    m_title ="";
+    m_language ="";
 
     string str = filurl.toLocalFile().toStdString();
     cout << str << endl;
@@ -75,7 +83,7 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
     unsigned char * buf;
     unsigned long long length;
 
-    if(findOpfFile(str.c_str(), &buf, &length))
+    if(findOpfFileInZip(str.c_str(), &buf, &length))
     {
         QByteArray array((const char *)buf,(int)length);
         QDomDocument doc;
@@ -83,54 +91,34 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
         QDomElement root=doc.documentElement();
 
         // Get the first child of the root (Markup metadata is expected)
-        QDomElement Component=root.firstChild().toElement();
+        QDomElement component=root.firstChild().toElement();
 
         // Loop while there is a child
-        while(!Component.isNull())
+        while(!component.isNull())
         {
             // Check if the child tag name is metadata
-            if (Component.tagName()=="metadata")
+            if (component.tagName()=="metadata")
             {
                 // Get the first child of the component
-                QDomElement Child=Component.firstChild().toElement();
+                QDomElement child=component.firstChild().toElement();
 
                 // Read each child of the metadata node
-                while (!Child.isNull())
+                while (!child.isNull())
                 {
                     // Read Name and value
-                    if (Child.tagName()=="dc:creator")
-                    {
-                        setcreator(Child.firstChild().toText().data());
-                        cout << "   Creator = " << creator().toStdString().c_str() << endl;
-                    }
-                    if (Child.tagName()=="dc:title")
-                    {
-                        settitle(Child.firstChild().toText().data());
-                        cout << "   Title = " << title().toStdString().c_str() << endl;
-                    }
-                    if (Child.tagName()=="dc:language")
-                    {
-                        setlanguage(Child.firstChild().toText().data());
-                        cout << "   Language = " << language().toStdString().c_str() << endl;
-                    }
-                    if (Child.tagName()=="dc:publisher")
-                    {
-                        setpublisher(Child.firstChild().toText().data());
-                        cout << "   Publisher = " << publisher().toStdString().c_str() << endl;
-                    }
-                    if (Child.tagName()=="dc:date")
-                    {
-                        setpublishDate(Child.firstChild().toText().data());
-                        cout << "   Date = " << publishDate().toStdString().c_str() << endl;
-                    }
+                    checkTag(child,"dc:creator", m_creator);
+                    checkTag(child,"dc:title", m_title);
+                    checkTag(child,"dc:language", m_language);
+                    checkTag(child,"dc:publisher", m_publisher);
+                    checkTag(child,"dc:date", m_publishDate);
 
                     // Next child
-                    Child = Child.nextSibling().toElement();
+                    child = child.nextSibling().toElement();
                 }
             }
 
             // Next component
-            Component = Component.nextSibling().toElement();
+            component = component.nextSibling().toElement();
         }
         free(buf);
     }

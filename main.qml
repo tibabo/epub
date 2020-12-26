@@ -13,7 +13,7 @@ Window {
 
     FileDialog {
         id: fileDialog
-        title: "Please choose a file"
+        title: "Please choose an Epub file"
         folder: shortcuts.home
 
         onAccepted: {
@@ -29,7 +29,7 @@ Window {
     Button {
             width: 100
             height: 50
-            text: "Open"
+            text: "Open EPUB"
             onClicked: fileDialog.open()
         }
     Text

@@ -3,11 +3,15 @@
 
 using namespace std;
 
+// return extension
+
 const char *pathExtension(const char *filename) {
     const char *dot = strrchr(filename, '.');
     if(!dot || dot == filename) return "";
     return dot + 1;
 }
+
+// find first file wit opf extension and unzip it
 
 bool SingletonEpubReader::findOpfFileInZip(const char * path, unsigned  char ** buffer , unsigned long long *length)
 {
@@ -60,6 +64,8 @@ bool SingletonEpubReader::findOpfFileInZip(const char * path, unsigned  char ** 
     return true;
 }
 
+// check tag name and assign its value to corresponding string property
+
 void SingletonEpubReader::checkTag(const QDomElement & child, const QString & tag, QString & dest)
 {
     if (child.tagName() == tag)
@@ -69,8 +75,13 @@ void SingletonEpubReader::checkTag(const QDomElement & child, const QString & ta
     }
 }
 
+// Open epub file find opf, find metadata , assign to corresponding string property
+// and signal to user interface
+
 void SingletonEpubReader::openFile(const QUrl & filurl)
 {
+    // clear previous string properties
+
     m_creator = "";
     m_publishDate ="";
     m_publisher ="";
@@ -78,11 +89,12 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
     m_language ="";
 
     string str = filurl.toLocalFile().toStdString();
-    cout << str << endl;
+    qDebug() << "openFile " << filurl.toLocalFile();
 
     unsigned char * buf;
     unsigned long long length;
 
+    // Open epub and unzip opf file
     if(findOpfFileInZip(str.c_str(), &buf, &length))
     {
         QByteArray array((const char *)buf,(int)length);
@@ -124,9 +136,10 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
     }
     else
     {
-        cout << "content.opf not found" << endl;
+        qDebug() << " *.opf not found";
     }
 
+    // signal to user interface for update
     emit valuesChanged();
 
     return;

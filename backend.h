@@ -7,6 +7,7 @@
 #include <qqml.h>
 #include <QFileInfo>
 #include <QDomDocument>
+#include <QTemporaryDir>
 
 using namespace std;
 
@@ -27,6 +28,8 @@ class SingletonEpubReader : public QObject
     STRING_PROPERTY(publisher)
     STRING_PROPERTY(language)
     STRING_PROPERTY(title)
+    STRING_PROPERTY(description)
+    STRING_PROPERTY(cover)
 
 signals:
     void valuesChanged();
@@ -38,4 +41,8 @@ public:
 private:
     bool findOpfFileInZip(const char *path, unsigned char **buffer, unsigned long long *length);
     void checkTag(const QDomElement &child, const QString &tag, QString &dest);
+    void findMetadata(const QDomElement &component);
+    void unzipCover(const QString & coverName, const QString & epubPath);
+    void findCoverName(const QDomElement &component, QString &coverName);
+    QTemporaryDir * m_tmpDir = nullptr;
 };

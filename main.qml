@@ -27,6 +27,9 @@ Window {
     }
 
     Button {
+        id: button1
+        x : 10
+        y : 10
         width: 100
         height: 50
         text: "Open EPUB"
@@ -34,11 +37,28 @@ Window {
     }
 
     Text {
-        x:100
+        x: button1.x + 110
         text: "TITLE: " + Epub.title +
               "\n\rCREATOR: " + Epub.creator +
               "\n\rLANGUAGE: " + Epub.language +
               "\n\rPUBLISHER: " + Epub.publisher +
               "\n\rPUBLISH DATE: " + Epub.publishDate
+    }
+    Text {
+        x: button1.x + 110
+        y:100
+        width: parent.width - x-10
+        wrapMode: Text.WordWrap
+        id:description
+        text: Epub.description
+    }
+    Image {
+        id: cover
+        source: Epub.cover
+        x: 10
+        y: button1.y + button1.height + 10
+        width:100
+        fillMode: Image.PreserveAspectFit
+        antialiasing: true
     }
 }

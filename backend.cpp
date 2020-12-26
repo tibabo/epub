@@ -81,6 +81,73 @@ void SingletonEpubReader::checkTag(const QDomElement &child, const QString &tag,
     }
 }
 
+void SingletonEpubReader::unzipCover(const QString &coverName, const QString &epubPath)
+{
+    unsigned char *buf;
+    unsigned long long length;
+
+    if(coverName != "" && unZipOneFile((char *)coverName.toStdString().c_str() , &buf, &length, (char *)epubPath.toStdString().c_str()))
+    {
+        m_tmpDir = new QTemporaryDir;
+        if(m_tmpDir->isValid())
+        {
+            QString dstFilePath = QDir::cleanPath(m_tmpDir->filePath(coverName));
+            QFile coverFile(dstFilePath);
+            coverFile.open(QIODevice::WriteOnly);
+            coverFile.write((const char *)buf,length);
+            coverFile.close();
+            m_cover = "file:/" + dstFilePath;
+        }
+        free(buf);
+    }
+}
+
+void SingletonEpubReader::findMetadata(const QDomElement &component)
+{
+    // Check if the child tag name is metadata
+    if (component.tagName() == "metadata")
+    {
+        // Get the first child of the component
+        QDomElement child = component.firstChild().toElement();
+
+        // Read each child of the metadata node
+        while (!child.isNull())
+        {
+            checkTag(child, "dc:creator", m_creator);
+            checkTag(child, "dc:title", m_title);
+            checkTag(child, "dc:language", m_language);
+            checkTag(child, "dc:publisher", m_publisher);
+            checkTag(child, "dc:date", m_publishDate);
+            checkTag(child, "dc:description", m_description);
+
+            // Next child
+            child = child.nextSibling().toElement();
+        }
+    }
+}
+
+void SingletonEpubReader::findCoverName(const QDomElement &component, QString &coverName)
+{
+    if (component.tagName() == "manifest")
+    {
+        QDomElement child = component.firstChild().toElement();
+
+        // Read each child of the metadata node
+        while (!child.isNull())
+        {
+            if (child.attribute("id", "") == "cover")
+            {
+                coverName = child.attribute("href","");
+                QFileInfo info(coverName);
+                coverName = info.fileName();
+                qDebug() << "cover file " << coverName;
+            }
+            // Next child
+            child = child.nextSibling().toElement();
+        }
+    }
+}
+
 // Open epub file find opf, find metadata , assign to corresponding string property
 // and signal to user interface
 
@@ -123,30 +190,14 @@ void SingletonEpubReader::openFile(const QUrl &filurl)
         // Loop while there is a child
         while (!component.isNull())
         {
-            // Check if the child tag name is metadata
-            if (component.tagName() == "metadata")
-            {
-                // Get the first child of the component
-                QDomElement child = component.firstChild().toElement();
+            findMetadata(component);
+            findCoverName(component, coverName);
 
-                // Read each child of the metadata node
-                while (!child.isNull())
-                {
-                    checkTag(child, "dc:creator", m_creator);
-                    checkTag(child, "dc:title", m_title);
-                    checkTag(child, "dc:language", m_language);
-                    checkTag(child, "dc:publisher", m_publisher);
-                    checkTag(child, "dc:date", m_publishDate);
-
-                    // Next child
-                    child = child.nextSibling().toElement();
-                }
-            }
-
-            // Next component
             component = component.nextSibling().toElement();
         }
         free(buf);
+
+        unzipCover(coverName, filurl.toLocalFile());
     }
     else
     {

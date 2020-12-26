@@ -27,19 +27,18 @@ Window {
     }
 
     Button {
-            width: 100
-            height: 50
-            text: "Open EPUB"
-            onClicked: fileDialog.open()
-        }
-    Text
-    {
+        width: 100
+        height: 50
+        text: "Open EPUB"
+        onClicked: fileDialog.open()
+    }
+
+    Text {
         x:100
         text: "TITLE: " + Epub.title +
               "\n\rCREATOR: " + Epub.creator +
               "\n\rLANGUAGE: " + Epub.language +
               "\n\rPUBLISHER: " + Epub.publisher +
               "\n\rPUBLISH DATE: " + Epub.publishDate
-
     }
 }

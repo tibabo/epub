@@ -10,11 +10,13 @@
 
 using namespace std;
 
-#define STRING_PROPERTY(a) public : \
-    QString a() const { return m_##a;} \
-    private: \
-    Q_PROPERTY(QString a       READ a        NOTIFY valuesChanged) \
-        QString m_##a;
+#define STRING_PROPERTY(a)                            \
+public:                                               \
+    QString a() const { return m_##a; }               \
+                                                      \
+private:                                              \
+    Q_PROPERTY(QString a READ a NOTIFY valuesChanged) \
+    QString m_##a;
 
 class SingletonEpubReader : public QObject
 {
@@ -26,15 +28,14 @@ class SingletonEpubReader : public QObject
     STRING_PROPERTY(language)
     STRING_PROPERTY(title)
 
-    signals:
-        void valuesChanged();
+signals:
+    void valuesChanged();
 
-  public:
-    explicit SingletonEpubReader(QObject* parent = nullptr) : QObject(parent) {}
+public:
+    explicit SingletonEpubReader(QObject *parent = nullptr) : QObject(parent) {}
+    Q_INVOKABLE void openFile(const QUrl &filename);
 
-
-    Q_INVOKABLE void openFile(const QUrl & filename);
-   private:
-    bool findOpfFileInZip(const char * path, unsigned  char ** buffer , unsigned long long *length);
-    void checkTag(const QDomElement & child, const QString & tag, QString & dest);
+private:
+    bool findOpfFileInZip(const char *path, unsigned char **buffer, unsigned long long *length);
+    void checkTag(const QDomElement &child, const QString &tag, QString &dest);
 };

@@ -93,17 +93,26 @@ void SingletonEpubReader::openFile(const QUrl &filurl)
     m_publisher = "";
     m_title = "";
     m_language = "";
+    m_cover = "";
+    m_description = "";
+
+    if(m_tmpDir)
+    {
+        delete m_tmpDir;
+        m_tmpDir = nullptr;
+    }
 
     string str = filurl.toLocalFile().toStdString();
     qDebug() << "openFile " << filurl.toLocalFile();
 
     unsigned char *buf;
     unsigned long long length;
+    QString coverName;
 
     // Open epub and unzip opf file
     if (findOpfFileInZip(str.c_str(), &buf, &length))
     {
-        QByteArray array((const char *)buf, (int)length);
+        QByteArray array = QByteArray::fromRawData((const char *)buf, (int)length);
         QDomDocument doc;
         doc.setContent(array, false);
         QDomElement root = doc.documentElement();

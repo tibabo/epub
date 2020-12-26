@@ -4,6 +4,63 @@
 
 using namespace std;
 
+const char *pathExtension(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
+
+bool findOpfFile(const char * path, unsigned  char ** buffer , unsigned long long *length)
+{
+    int ret;
+    zipFile zip = unzOpen(path);
+    if(zip == NULL) return 0;
+
+    unzGoToFirstFile(zip);
+    do{
+        unz_file_info fileInfo;
+        memset(&fileInfo, 0, sizeof(unz_file_info));
+        ret = unzOpenCurrentFile(zip);
+        ret = unzGetCurrentFileInfo(zip, &fileInfo, NULL, 0, NULL, 0, NULL, 0);
+
+        char *file = (char *)malloc(fileInfo.size_filename + 1);
+        unzGetCurrentFileInfo(zip, &fileInfo, file, fileInfo.size_filename + 1, NULL, 0, NULL, 0);
+        file[fileInfo.size_filename] = '\0';
+
+        char *fname = NULL;
+
+        char * subptr = strrchr (file, '/');
+        if(subptr)
+        {
+            fname = subptr + 1;
+        }
+        else
+        {
+            fname = file;
+        }
+
+        if(strcasecmp(pathExtension(fname),"opf") == 0) {
+            free(file);
+            *buffer = (unsigned char *)malloc(fileInfo.uncompressed_size);
+            *length = unzReadCurrentFile(zip, *buffer, fileInfo.uncompressed_size);
+            if(*length<=0){
+                printf("fail to extract zip %s\n",path);
+            }
+            break;
+        }
+        free(file);
+        unzCloseCurrentFile( zip );
+        ret = unzGoToNextFile( zip );
+    } while(ret == UNZ_OK && ret != UNZ_END_OF_LIST_OF_FILE);
+
+    if(ret == UNZ_END_OF_LIST_OF_FILE)
+    {
+        printf("fail to extract zip file %s\n",path);
+        return false;
+    }
+    return true;
+}
+
 void SingletonEpubReader::openFile(const QUrl & filurl)
 {
     setcreator("");
@@ -15,10 +72,10 @@ void SingletonEpubReader::openFile(const QUrl & filurl)
     string str = filurl.toLocalFile().toStdString();
     cout << str << endl;
 
-    unsigned  char * buf;
+    unsigned char * buf;
     unsigned long long length;
 
-    if(unZipOneFile((char*)"content.opf", &buf, &length, (char *)str.c_str()))
+    if(findOpfFile(str.c_str(), &buf, &length))
     {
         QByteArray array((const char *)buf,(int)length);
         QDomDocument doc;

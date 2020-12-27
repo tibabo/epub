@@ -37,7 +37,9 @@ Window {
     }
 
     Text {
-        x: button1.x + 110
+        id : meta
+        x: button1.x + button1.width + 10
+        y: button1.y
         text: "TITLE: " + Epub.title +
               "\n\rCREATOR: " + Epub.creator +
               "\n\rLANGUAGE: " + Epub.language +
@@ -45,19 +47,19 @@ Window {
               "\n\rPUBLISH DATE: " + Epub.publishDate
     }
     Text {
-        x: button1.x + 110
-        y:100
-        width: parent.width - x-10
+        x: meta.x
+        y: 100
+        width: parent.width - x - 10
         wrapMode: Text.WordWrap
-        id:description
+        id: description
         text: Epub.description
     }
     Image {
         id: cover
         source: Epub.cover
-        x: 10
+        x: button1.x
         y: button1.y + button1.height + 10
-        width:100
+        width: button1.width
         fillMode: Image.PreserveAspectFit
         antialiasing: true
     }

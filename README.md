@@ -8,7 +8,7 @@ You can either open the `epub.pro` file in QtCreator or use qmake to build the p
 
 To build it using qmake and Makefile use the following commands:
 
- bash
+```shell
 # Create a build folder
 $ mkdir build
 
@@ -23,3 +23,4 @@ $ make
 
 # Finally execute the project
 $ ./epub
+``` 

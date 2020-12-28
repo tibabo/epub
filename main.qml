@@ -29,7 +29,7 @@ Window {
     }
 
     Button {
-        id: button1
+        id: buttonOpen
         x : 10
         y : 10
         width: 100
@@ -38,7 +38,7 @@ Window {
         onClicked: fileDialog.open()
     }
 
-    InputItem {id:input1; x: button1.x + button1.width + 10; y: button1.y; title:"TITLE:"; value: Epub.title; input.onTextEdited:{Epub.title = value}}
+    InputItem {id:input1; x: buttonOpen.x + buttonOpen.width + 10; y: buttonOpen.y; title:"TITLE:"; value: Epub.title; input.onTextEdited:{Epub.title = value}}
     InputItem {id:input2; x: input1.x; y: input1.y + input1.height; title:"CREATOR:"; value: Epub.creator; input.onTextEdited:{Epub.creator = value}}
     InputItem {id:input3; x: input1.x; y: input2.y + input2.height; title:"PUBLISHER:"; value: Epub.publisher; input.onTextEdited:{Epub.publisher = value}}
     InputItem {id:input4; x: input1.x; y: input3.y + input3.height; title:"LANGUAGE:"; value: Epub.language; input.onTextEdited:{Epub.language = value}}
@@ -57,9 +57,9 @@ Window {
     Image {
         id: cover
         source: Epub.cover
-        x: button1.x
-        y: button1.y + button1.height + 10
-        width: button1.width
+        x: buttonOpen.x
+        y: buttonOpen.y + buttonOpen.height + 10
+        width: buttonOpen.width
         fillMode: Image.PreserveAspectFit
         antialiasing: true
     }

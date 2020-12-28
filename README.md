@@ -1,4 +1,4 @@
-# Epub QML Reader
+# Epub metadata Editor
 
 The project uses Qt5 and qmake. Be sure to use Qt5 or the project will not build.
 

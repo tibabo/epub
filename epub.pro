@@ -12,7 +12,8 @@ SOURCES += \
         minizip/unzip.c \
         minizip/zip.c \
         minizip/mztools.c \
-        minizip/ioapi.c
+        minizip/ioapi.c \
+        minizip/del.c
 
 RESOURCES += qml.qrc
 

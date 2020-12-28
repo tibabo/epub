@@ -1,5 +1,6 @@
 ﻿#include "backend.h"
 #include "minizip/unzip.h"
+#include "minizip/del.h"
 
 using namespace std;
 
@@ -34,20 +35,9 @@ bool SingletonEpubReader::findOpfFileInZip(const char *path, unsigned char **buf
         unzGetCurrentFileInfo(zip, &fileInfo, file, fileInfo.size_filename + 1, NULL, 0, NULL, 0);
         file[fileInfo.size_filename] = '\0';
 
-        char *fname = NULL;
-
-        char *subptr = strrchr(file, '/');
-        if (subptr)
+        if (strcasecmp(pathExtension(file), "opf") == 0)
         {
-            fname = subptr + 1;
-        }
-        else
-        {
-            fname = file;
-        }
-
-        if (strcasecmp(pathExtension(fname), "opf") == 0)
-        {
+            m_contentFilePath = file;
             free(file);
             *buffer = (unsigned char *)malloc(fileInfo.uncompressed_size);
             *length = unzReadCurrentFile(zip, *buffer, fileInfo.uncompressed_size);
@@ -72,12 +62,12 @@ bool SingletonEpubReader::findOpfFileInZip(const char *path, unsigned char **buf
 
 // check tag name and assign its value to corresponding string property
 
-void SingletonEpubReader::checkTag(const QDomElement &child, const QString &tag, QString &dest)
+void SingletonEpubReader::checkTag(const QDomElement &child, const QString &tag, QDomElement &dest)
 {
     if (child.tagName() == tag)
     {
-        dest = child.firstChild().toText().data();
-        qDebug() << tag << " : " << dest;
+        dest = child;
+        qDebug() << tag << " : " << dest.firstChild().toText().data();
     }
 }
 
@@ -154,14 +144,15 @@ void SingletonEpubReader::findCoverName(const QDomElement &component, QString &c
 void SingletonEpubReader::openFile(const QUrl &filurl)
 {
     // clear previous string properties
+    m_doc = QDomDocument();
+    setcreator("");
+    setpublishDate("");
+    setpublisher("");
+    settitle("");
+    setlanguage("");
+    setdescription("");
 
-    m_creator = "";
-    m_publishDate = "";
-    m_publisher = "";
-    m_title = "";
-    m_language = "";
     m_cover = "";
-    m_description = "";
 
     if(m_tmpDir)
     {
@@ -171,6 +162,7 @@ void SingletonEpubReader::openFile(const QUrl &filurl)
 
     string str = filurl.toLocalFile().toStdString();
     qDebug() << "openFile " << filurl.toLocalFile();
+    m_epubFile = filurl.toLocalFile();
 
     unsigned char *buf;
     unsigned long long length;
@@ -179,10 +171,12 @@ void SingletonEpubReader::openFile(const QUrl &filurl)
     // Open epub and unzip opf file
     if (findOpfFileInZip(str.c_str(), &buf, &length))
     {
-        QByteArray array = QByteArray::fromRawData((const char *)buf, (int)length);
-        QDomDocument doc;
-        doc.setContent(array, false);
-        QDomElement root = doc.documentElement();
+        QByteArray array;
+        array.append((const char *)buf, (int)length);
+        free(buf);
+
+        m_doc.setContent(array, false);
+        QDomElement root = m_doc.documentElement();
 
         // Get the first child of the root (Markup metadata is expected)
         QDomElement component = root.firstChild().toElement();
@@ -195,7 +189,6 @@ void SingletonEpubReader::openFile(const QUrl &filurl)
 
             component = component.nextSibling().toElement();
         }
-        free(buf);
 
         unzipCover(coverName, filurl.toLocalFile());
     }
@@ -208,4 +201,39 @@ void SingletonEpubReader::openFile(const QUrl &filurl)
     emit valuesChanged();
 
     return;
+}
+
+bool SingletonEpubReader::save()
+{
+    if(0 != DeleteFileFromZIP(m_epubFile.toStdString().c_str(), m_contentFilePath.toStdString().c_str()))
+    {
+        qDebug() << "Fail to delete previous opf file";
+        return false;
+    }
+    QByteArray array = m_doc.toByteArray();
+    zipFile zip = zipOpen(m_epubFile.toStdString().c_str(),APPEND_STATUS_ADDINZIP);
+    if(zip == nullptr)
+    {
+        qDebug() << "Fail to open zip file";
+        return false;
+    }
+    zip_fileinfo zipfi;
+    if(ZIP_OK != zipOpenNewFileInZip(zip, m_contentFilePath.toStdString().c_str(), &zipfi, nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION))
+    {
+        qDebug() << "Fail to open file in zip file";
+        zipClose(zip,nullptr);
+        return false;
+    }
+    if(ZIP_OK != zipWriteInFileInZip(zip, array.data(), array.length()))
+    {
+        qDebug() << "Fail to write in zip file";
+        zipCloseFileInZip(zip);
+        zipClose(zip,nullptr);
+        return false;
+    }
+    zipCloseFileInZip(zip);
+    zipClose(zip,nullptr);
+
+    qDebug() << "file saved";
+    return true;
 }
